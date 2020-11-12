@@ -12,45 +12,43 @@ client.on('ready', () => {
 })
 
 client.on('message', async (msg) => {
-    if(msg.channel.id == '776501886404526120') {
 
-        let input = removePrefix(msg)
+    let input = removePrefix(msg)
 
-        //Handle GPT2 Responses
-        if(msg.content.startsWith("!ai complete this: ") 
-        || msg.content.startsWith("!gpt2 ")) {
+    //Handle GPT2 Responses
+    if(msg.content.startsWith("!ai complete this: ") 
+    || msg.content.startsWith("!gpt2 ")) {
 
-            const response = await askGPT2(input)
-            msg.reply(response)
+        const response = await askGPT2(input)
+        msg.reply(response)
 
-        }
+    }
 
-        if(msg.content.startsWith("!ai fill this in: ") 
-        || msg.content.startsWith("!bert ")){
+    if(msg.content.startsWith("!ai fill this in: ") 
+    || msg.content.startsWith("!bert ")){
 
-            const response = await askBERT(input)
-            msg.reply(response)
+        const response = await askBERT(input)
+        msg.reply(response)
 
-        }
+    }
 
-        if(msg.content.startsWith("!ai help")){
+    if(msg.content.startsWith("!ai help")){
 
-            msg.reply("Hey!")
+        msg.reply("Hey!")
 
-            const helpEmbed = new Discord.MessageEmbed()
-                .setColor('#d3d3d3')
-                .setTitle("I'm an Artificially Intelligent DudeBot")
-                .setDescription("I'm a bot powered by the GPT2 and BERT models provided by the folks at HuggingFace (https://huggingface.co/) \n \n \
-                **GPT2** can autocomplete your sentences! \n Just use **'!gpt2 {your sentence here}'** or **'!ai complete this: {your sentence here}** \n \n \
-                **BERT** can fill in the blanks in your sentences! \n Just use **'!bert {your sentence here and mark the blanks with __-blank-__}'** or **'!ai fill this in: {your sentence here and mark the blanks with __-blank-__}'**")
+        const helpEmbed = new Discord.MessageEmbed()
+            .setColor('#d3d3d3')
+            .setTitle("I'm an Artificially Intelligent DudeBot")
+            .setDescription("I'm a bot powered by the GPT2 and BERT models provided by the folks at HuggingFace (https://huggingface.co/) \n \n \
+            **GPT2** can autocomplete your sentences! \n Just use **'!gpt2 {your sentence here}'** or **'!ai complete this: {your sentence here}** \n \n \
+            **BERT** can fill in the blanks in your sentences! \n Just use **'!bert {your sentence here and mark the blanks with __-blank-__}'** or **'!ai fill this in: {your sentence here and mark the blanks with __-blank-__}'**")
 
-            msg.channel.send(helpEmbed)
-        }
+        msg.channel.send(helpEmbed)
+    }
 
-        if(msg.mentions.has(client.user) && !msg.mentions.everyone){
-            msg.reply("Hey!!!")
-            msg.channel.send(">>> If you need any help talking to me, use !ai help")
-        }
+    if(msg.mentions.has(client.user) && !msg.mentions.everyone){
+        msg.reply("Hey!!!")
+        msg.channel.send(">>> If you need any help talking to me, use !ai help")
     }
 })
 
