@@ -3,7 +3,7 @@ const axios = require('axios')
 
 const Discord = require('discord.js')
 const client = new Discord.Client()
-client.login(process.env.BOT_TOKEN)
+client.login(Nzc2NTAwNTM0MzgyOTUyNDc4.X61yeg.v6CcZC4Mt8JdSiSXYnq1oaYg9jc)
 
 console.log("Bot getting ready... ✨")
 
