@@ -32,6 +32,25 @@ client.on('message', async (msg) => {
             msg.reply(response)
 
         }
+
+        if(msg.content.startsWith("!ai help")){
+
+            msg.reply("Hey!")
+
+            const helpEmbed = new Discord.MessageEmbed()
+                .setColor('#d3d3d3')
+                .setTitle("I'm an Artificially Intelligent DudeBot")
+                .setDescription("I'm a bot powered by the GPT2 and BERT models provided by the folks at HuggingFace (https://huggingface.co/) \n \n \
+                **GPT2** can autocomplete your sentences! \n Just use **'!gpt2 {your sentence here}'** or **'!ai complete this: {your sentence here}** \n \n \
+                **BERT** can fill in the blanks in your sentences! \n Just use **'!bert {your sentence here and mark the blanks with __-blank-__}'** or **'!ai fill this in: {your sentence here and mark the blanks with __-blank-__}'**")
+
+            msg.channel.send(helpEmbed)
+        }
+
+        if(msg.mentions.has(client.user) && !msg.mentions.everyone){
+            msg.reply("Hey!!!")
+            msg.channel.send(">>> If you need any help talking to me, use !ai help")
+        }
     }
 })
 
