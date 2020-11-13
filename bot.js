@@ -3,15 +3,17 @@ const axios = require('axios')
 
 const Discord = require('discord.js')
 const client = new Discord.Client()
-client.login("Nzc2NTAwNTM0MzgyOTUyNDc4.X61yeg.v6CcZC4Mt8JdSiSXYnq1oaYg9jc")
+client.login(process.env.BOT_TOKEN)
 
 console.log("Bot getting ready... ✨")
 
-client.on('ready', () => {
+client.once('ready', () => {
     console.log("up and running! 🎉")
 })
 
 client.on('message', async (msg) => {
+
+    if( msg.author.bot ) return
 
     let input = removePrefix(msg)
 
@@ -24,12 +26,20 @@ client.on('message', async (msg) => {
 
     }
 
+    //Handle BERT Responses
     if(msg.content.startsWith("!ai fill this in: ") 
     || msg.content.startsWith("!bert ")){
 
         const response = await askBERT(input)
         msg.reply(response)
 
+    }
+
+    //Handle BERTQA Responses
+    if(msg.content.startsWith("!qa ")){
+
+        const response = await askBERTQA(input)
+        msg.reply(response)
     }
 
     if(msg.content.startsWith("!ai help")){
@@ -53,7 +63,7 @@ client.on('message', async (msg) => {
 })
 
 function removePrefix(message){
-    const prefix = ["!ai complete this: ", "!gpt2 ", "!ai fill this in: ", "!bert "]
+    const prefix = ["!ai complete this: ", "!gpt2 ", "!ai fill this in: ", "!bert ", "!qa"]
 
     for(i = 0; i < prefix.length; i++){
         if(message.content.startsWith(prefix[i])){
@@ -83,6 +93,8 @@ async function askGPT2(input) {
 
 async function askBERT(input) {
 
+    let output
+
     if (input.substr(input.length-1) !== "."){
         input = input.concat(".")
     }
@@ -92,8 +104,6 @@ async function askBERT(input) {
     }else {
         input = input.replace("-blank-", "[MASK]")
     }
-
-    let output
 
     await axios.post("https://api-inference.huggingface.co/models/bert-base-uncased", {
         "inputs": input,
@@ -109,4 +119,24 @@ async function askBERT(input) {
 
     return input.replace("[MASK]", ("**" + output.data[0].token_str +"**"))
 
+}
+
+async function askBERTQA(input) {
+
+    let output
+
+    const context = "This is a server made for testing robots developed by friends"
+
+    //console.log(input)
+
+    await axios.post("https://api-inference.huggingface.co/models/deepset/bert-large-uncased-whole-word-masking-squad2", {
+        "context": context,
+        "question": input
+    }).then(function (response){
+        output = response
+    }).catch(function(error){
+        console.log(error)
+    })
+
+    return output.data.answer
 }
