@@ -1,5 +1,6 @@
 require('dotenv').config()
-const axios = require('axios')
+const huggingface_api = require('./helpers/huggingface_api.js')
+const utils = require('./helpers/utils.js')
 
 const Discord = require('discord.js')
 const client = new Discord.Client()
@@ -15,13 +16,13 @@ client.on('message', async (msg) => {
 
     if( msg.author.bot ) return
 
-    let input = removePrefix(msg)
+    let input = utils.removePrefix(msg)
 
     //Handle GPT2 Responses
     if(msg.content.startsWith("!ai complete this: ") 
     || msg.content.startsWith("!gpt2 ")) {
 
-        const response = await askGPT2(input)
+        const response = await huggingface_api.askGPT2(input)
         msg.reply(response)
 
     }
@@ -30,7 +31,7 @@ client.on('message', async (msg) => {
     if(msg.content.startsWith("!ai fill this in: ") 
     || msg.content.startsWith("!bert ")){
 
-        const response = await askBERT(input)
+        const response = await huggingface_api.askBERT(input)
         msg.reply(response)
 
     }
@@ -38,7 +39,7 @@ client.on('message', async (msg) => {
     //Handle BERTQA Responses
     if(msg.content.startsWith("!qa ")){
 
-        const response = await askBERTQA(input)
+        const response = await huggingface_api.askBERTQA(input)
         msg.reply(response)
     }
 
@@ -61,82 +62,3 @@ client.on('message', async (msg) => {
         msg.channel.send(">>> If you need any help talking to me, use !ai help")
     }
 })
-
-function removePrefix(message){
-    const prefix = ["!ai complete this: ", "!gpt2 ", "!ai fill this in: ", "!bert ", "!qa"]
-
-    for(i = 0; i < prefix.length; i++){
-        if(message.content.startsWith(prefix[i])){
-            return message.content.slice(prefix[i].length).trim()
-        }
-    }
-}
-
-async function askGPT2(input) {
-
-    response_length = Math.floor(1 + Math.random() * 20)*5
-    let output
-
-    await axios.post("https://api-inference.huggingface.co/models/gpt2", {
-        "inputs": input,
-        "parameters": {
-            "max_length": response_length
-        }
-    }).then(function (response){
-        output = response
-    }).catch(function(error){
-        console.log(error)
-    })
-
-    return output.data[0].generated_text
-}
-
-async function askBERT(input) {
-
-    let output
-
-    if (input.substr(input.length-1) !== "."){
-        input = input.concat(".")
-    }
-
-    if(input.search("-blank-") == -1){
-        return "You need to specify what you want me to guess by using -blank-"
-    }else {
-        input = input.replace("-blank-", "[MASK]")
-    }
-
-    await axios.post("https://api-inference.huggingface.co/models/bert-base-uncased", {
-        "inputs": input,
-        "parameters": {
-            "top_k": 1
-        }
-    }).then(function (response){
-        console.log(response)
-        output = response
-    }).catch(function(error){
-        console.log(error)
-    })
-
-    return input.replace("[MASK]", ("**" + output.data[0].token_str +"**"))
-
-}
-
-async function askBERTQA(input) {
-
-    let output
-
-    const context = "This is a server made for testing robots developed by friends"
-
-    //console.log(input)
-
-    await axios.post("https://api-inference.huggingface.co/models/deepset/bert-large-uncased-whole-word-masking-squad2", {
-        "context": context,
-        "question": input
-    }).then(function (response){
-        output = response
-    }).catch(function(error){
-        console.log(error)
-    })
-
-    return output.data.answer
-}
