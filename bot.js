@@ -1,9 +1,19 @@
 require('dotenv').config()
+const fs = require('fs')
 const huggingface_api = require('./helpers/huggingface_api.js')
 const utils = require('./helpers/utils.js')
+const prefix = "!"
 
 const Discord = require('discord.js')
 const client = new Discord.Client()
+client.commands = new Discord.Collection()
+
+const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'))
+for (const file of commandFiles) {
+	const command = require(`./commands/${file}`);
+	client.commands.set(command.name, command);
+}
+
 client.login(process.env.BOT_TOKEN)
 
 console.log("Bot getting ready... ✨")
@@ -14,33 +24,17 @@ client.once('ready', () => {
 
 client.on('message', async (msg) => {
 
-    if( msg.author.bot ) return
+    if( !msg.content.startsWith(prefix) || msg.author.bot ) return
 
-    let input = utils.removePrefix(msg)
+    const [commandName, input] = utils.extractInfo(prefix, msg)
 
-    //Handle GPT2 Responses
-    if(msg.content.startsWith("!ai complete this: ") 
-    || msg.content.startsWith("!gpt2 ")) {
+    if (!client.commands.has(commandName)) return;
 
-        const response = await huggingface_api.askGPT2(input)
-        msg.reply(response)
-
-    }
-
-    //Handle BERT Responses
-    if(msg.content.startsWith("!ai fill this in: ") 
-    || msg.content.startsWith("!bert ")){
-
-        const response = await huggingface_api.askBERT(input)
-        msg.reply(response)
-
-    }
-
-    //Handle BERTQA Responses
-    if(msg.content.startsWith("!qa ")){
-
-        const response = await huggingface_api.askBERTQA(input)
-        msg.reply(response)
+    try {
+        client.commands.get(commandName).execute(msg, input);
+    } catch (error) {
+        console.error(error);
+        message.reply('there was an error trying to execute that command!');
     }
 
     if(msg.content.startsWith("!ai help")){

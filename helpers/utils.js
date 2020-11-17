@@ -1,11 +1,8 @@
 module.exports = {
-    removePrefix: (message) => {
-        const prefix = ["!ai complete this: ", "!gpt2 ", "!ai fill this in: ", "!bert ", "!qa"]
-    
-        for(i = 0; i < prefix.length; i++){
-            if(message.content.startsWith(prefix[i])){
-                return message.content.slice(prefix[i].length).trim()
-            }
-        }
+    extractInfo: (prefix, message) => {
+        const command =  message.content.slice(prefix.length).split(' ')[0]
+        const input = message.content.slice(prefix.length + command.length).trim()
+
+        return [command, input]
     }
 }
